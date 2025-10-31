@@ -1,2 +1,3 @@
-# Used_Cars_Price_Prediction
-Machine learning model to predict price of a second hand car
+git add .
+git commit -m "Initial commit"
+git push -u origin main
