@@ -7,7 +7,9 @@ import requests
 from io import BytesIO
 from sklearn.preprocessing import OneHotEncoder
 
-# Load model
+# -----------------------------
+# Load Model
+# -----------------------------
 @st.cache_resource
 def load_model():
     with gzip.open('best_model.pkl.gz', 'rb') as f:
@@ -15,29 +17,33 @@ def load_model():
     return model
 
 model = load_model()
+st.success("✅ Model loaded successfully!")
 
-st.success("Model loaded successfully!")
-
-# Load dataset for sidebar options
+# -----------------------------
+# Load Dataset for Sidebar Options
+# -----------------------------
 df = pd.read_csv('car_price_dataset.csv', index_col=0)
 
-# App title and image
+# -----------------------------
+# App Title and Image
+# -----------------------------
+st.title('🚗 Ray Platinum Wheels Used Car Price Prediction APP')
 
-st.title('Ray Platinum Wheels Used Car Price Prediction APP')
 url = "https://raw.githubusercontent.com/Marope06/Used_Cars_Price_Prediction/main/cars.png"
-
-# Fetch the image
 response = requests.get(url)
 image = Image.open(BytesIO(response.content))
+st.image(image, use_container_width=True)
 
 # Show dataset sample
-st.write('Sample of the dataset')
+st.write("### Dataset Sample")
 st.write(df.head())
 
-# Sidebar for user inputs
+# -----------------------------
+# Sidebar Inputs
+# -----------------------------
 st.sidebar.header("Enter the car's key features")
 brand = st.sidebar.selectbox('Brand', df['brand'].unique())
-model = st.sidebar.selectbox('Model', df['model'].unique())
+model_name = st.sidebar.selectbox('Model', df['model'].unique())
 vehicle_age = st.sidebar.slider('Vehicle Age', 0, 30, 1)
 km_driven = st.sidebar.number_input("Kilometers Driven", min_value=0, max_value=500000, step=500)
 seller_type = st.sidebar.selectbox('Seller Type', df['seller_type'].unique())
@@ -48,12 +54,14 @@ engine = st.sidebar.number_input("Engine Capacity (CC)", min_value=500, max_valu
 max_power = st.sidebar.number_input("Max Power (bhp)", min_value=20.0, max_value=700.0, step=5.0)
 seats = st.sidebar.slider('Seats', 1, 7, 5)
 
-# Predict button
+# -----------------------------
+# Prediction Section
+# -----------------------------
 if st.button('Predict'):
-    # Create input dataframe
+    # Create input DataFrame
     input_data = pd.DataFrame({
         'brand': [brand],
-        'model': [model],
+        'model': [model_name],
         'vehicle_age': [vehicle_age],
         'km_driven': [km_driven],
         'seller_type': [seller_type],
@@ -65,40 +73,40 @@ if st.button('Predict'):
         'seats': [seats]
     })
 
-   #st.write("Input Data:", input_data)
-
     # Define categorical columns
     cat_cols = ['brand', 'model', 'seller_type', 'fuel_type', 'transmission_type']
 
-    # Initialize OneHotEncoder
+    # Encode categorical variables
     encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
-
-    # Fit encoder on categorical columns of the original dataset
     encoder.fit(df[cat_cols])
-
-    # Transform input data
     encoded_array = encoder.transform(input_data[cat_cols])
-
-    # Convert encoded array into DataFrame with correct column names
     encoded_df = pd.DataFrame(encoded_array, columns=encoder.get_feature_names_out(cat_cols))
 
-    # Combine encoded and numeric columns
+    # Combine encoded and numeric features
     input_encoded = pd.concat([input_data.drop(columns=cat_cols), encoded_df], axis=1)
 
-    # Align input columns with model’s expected columns
-    model_columns = load_model.feature_names_in_
+    # -----------------------------
+    # Align Columns with Model
+    # -----------------------------
+    if hasattr(model, 'feature_names_in_'):
+        model_columns = model.feature_names_in_
+    else:
+        # fallback (you can replace this with your actual feature list)
+        model_columns = input_encoded.columns.tolist()
 
+    # Add any missing columns
     for col in model_columns:
         if col not in input_encoded.columns:
             input_encoded[col] = 0
 
-    # Reorder columns to match training
+    # Reorder columns
     input_encoded = input_encoded[model_columns]
 
-    #st.write("Encoded Data Ready for Prediction:")
+    st.write("### Encoded Input Data")
     st.write(input_encoded.head())
 
-    # Make prediction
-    prediction = load_model.predict(input_encoded)
-    st.success(f"Your car is estimated to sell for: R {round(prediction[0], 2)}")
-    
+    # -----------------------------
+    # Predict
+    # -----------------------------
+    prediction = model.predict(input_encoded)
+    st.success(f"💰 Estimated Selling Price: R {round(prediction[0], 2)}")
