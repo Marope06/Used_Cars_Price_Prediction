@@ -8,8 +8,15 @@ from io import BytesIO
 from sklearn.preprocessing import OneHotEncoder
 
 # Load model
-with gzip.open('best_model.pkl.gz', 'rb') as f:
-    model = pickle.load(f)
+@st.cache_resource
+def load_model():
+    with gzip.open('best_model.pkl.gz', 'rb') as f:
+        model = pickle.load(f)
+    return model
+
+model = load_model()
+
+st.success("Model loaded successfully!")
 
 # Load dataset for sidebar options
 df = pd.read_csv('car_price_dataset.csv', index_col=0)
