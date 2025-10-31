@@ -15,12 +15,8 @@ with gzip.open('best_model.pkl.gz', 'rb') as f:
 df = pd.read_csv('car_price_dataset.csv', index_col=0)
 
 # App title and image
-st.title('Ray Platinum Wheels Used Car Price Prediction APP')
-from PIL import Image
-import requests
-from io import BytesIO
 
-# Raw GitHub URL of your image
+st.title('Ray Platinum Wheels Used Car Price Prediction APP')
 url = "https://raw.githubusercontent.com/Marope06/Used_Cars_Price_Prediction/main/cars.png"
 
 # Fetch the image
@@ -62,7 +58,7 @@ if st.button('Predict'):
         'seats': [seats]
     })
 
-    #st.write("Input Data:", input_data)
+   #st.write("Input Data:", input_data)
 
     # Define categorical columns
     cat_cols = ['brand', 'model', 'seller_type', 'fuel_type', 'transmission_type']
