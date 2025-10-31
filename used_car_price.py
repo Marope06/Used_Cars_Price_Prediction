@@ -3,6 +3,8 @@ import gzip
 import pickle
 import pandas as pd
 from PIL import Image
+import requests
+from io import BytesIO
 from sklearn.preprocessing import OneHotEncoder
 
 # Load model
@@ -14,8 +16,16 @@ df = pd.read_csv('car_price_dataset.csv', index_col=0)
 
 # App title and image
 st.title('Ray Platinum Wheels Used Car Price Prediction APP')
-image = Image.open('https://github.com/Marope06/Used_Cars_Price_Prediction\cars.png')
-st.image(image, use_container_width=True)
+from PIL import Image
+import requests
+from io import BytesIO
+
+# Raw GitHub URL of your image
+url = "https://raw.githubusercontent.com/Marope06/Used_Cars_Price_Prediction/main/cars.png"
+
+# Fetch the image
+response = requests.get(url)
+image = Image.open(BytesIO(response.content))
 
 # Show dataset sample
 st.write('Sample of the dataset')
